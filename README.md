@@ -2,7 +2,7 @@
 
 Hardware-accelerated adaptive Kalman filter for real-time speed and position estimation of a brushed DC motor, implemented in VHDL on a Xilinx Artix-7 FPGA and validated on physical hardware.
 
-> **Funding:** This project was supported by the **TÜBİTAK 2209-A University Students Research Projects Support Program**.
+
 > **Context:** Undergraduate graduation thesis, Electrical & Electronics Engineering, Haliç University (2026).
 
 ---
