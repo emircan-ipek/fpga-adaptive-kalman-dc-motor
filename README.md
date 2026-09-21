@@ -127,11 +127,11 @@ cd <repo-name>
 
 1. Create a new Vivado RTL project targeting **xc7a35tcpg236-1**.
 2. Add all files from `hdl/` as design sources.
-3. Add `constraints/basys3.xdc` as a constraints file.
+3. Add `constraints/Basys3_Kalman_Motor.xdc` as a constraints file.
 4. Run synthesis, implementation, and generate the bitstream.
 5. Connect the hardware per the wiring table in `docs/`, then program the Basys 3.
 
-To regenerate the filter HDL from the model, open `matlab/kalman_design.m` and run the HDL Coder workflow.
+To regenerate the filter HDL from the model, open `kalman_with_testbench_for_vivado.slx` and run the HDL Coder workflow.
 
 ---
 
