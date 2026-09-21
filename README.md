@@ -32,7 +32,7 @@ The design follows a modular VHDL architecture:
                 +------------------+                           |
                                                                v
   100 MHz clk ->+------------------+                  +------------------+
-                | pwm_generator    |--- PWM --------> |  kalman_filter   |--> filtered speed
+                | pwm_generator    |--- PWM --------> |  Kalman_28_yeni  |--> filtered speed
                 +------------------+   (to H-bridge)  |  (Q16, adaptive) |
                                                       +------------------+
 ```
