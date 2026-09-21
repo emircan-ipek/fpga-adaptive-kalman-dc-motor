@@ -1,36 +1,161 @@
-# FPGA Implementation of Adaptive Kalman Filtered-Based Speed Accuracy Enhancement For a DC Motor
+# FPGA Implementation of an Adaptive Kalman Filter for DC Motor Speed Estimation
 
-This repository contains the VHDL source code and MATLAB/Simulink models for an FPGA-based DC motor control and speed estimation system. The project focuses on enhancing speed accuracy using an Adaptive Kalman Filter implemented on hardware. 
+Hardware-accelerated adaptive Kalman filter for real-time speed and position estimation of a brushed DC motor, implemented in VHDL on a Xilinx Artix-7 FPGA and validated on physical hardware.
 
+> **Funding:** This project was supported by the **TÜBİTAK 2209-A University Students Research Projects Support Program**.
+> **Context:** Undergraduate graduation thesis, Electrical & Electronics Engineering, Haliç University (2026).
 
-##  System Architecture
+---
 
-The hardware architecture is designed using a modular approach in VHDL, consisting of the following core modules:
-* **PWM Generator:** Generates high-frequency PWM signals to drive the DC motor.
-* **Encoder Reader:** Interfaces with the rotary encoder via Pmod ports to read A/B channel quadrature signals in real-time.
-* **Kalman Filter Module:** A hardware-accelerated Adaptive Kalman Filter algorithm for robust speed and position estimation, mitigating sensor noise.
-* **Top Module:** Integrates all sub-modules and maps them to the physical pins of the FPGA board using XDC constraints.
+## Why this project
 
-##  Hardware & Software Used
+Quadrature encoder readings on a low-cost DC motor are noisy, and naive differentiation of position to obtain speed amplifies that noise badly. This project moves the filtering into hardware: a 2-state discrete Kalman filter runs entirely on the FPGA fabric in fixed-point arithmetic, producing a stable speed estimate with deterministic latency and no processor in the loop.
 
-* **Development Board:** Digilent Basys 3 (Artix-7 FPGA)
-* **Hardware Description Language:** VHDL
-* **IDE & Synthesis:** Xilinx Vivado
-* **Modeling & Simulation:** MATLAB & Simulink
-* **Actuators & Sensors:** DC Motor, Rotary Quadrature Encoder
+The filter is **adaptive** — the measurement noise covariance `R` is scaled according to the residual magnitude, so the filter automatically trusts the encoder less during transients and more during steady-state operation.
 
-##  Project Workflow
+---
 
-1. **Algorithm Design:** The Adaptive Kalman Filter was initially modeled and tested in MATLAB/Simulink.
-2. **Hardware Implementation:** The validated mathematical model was translated into synthesized VHDL code.
-3. **Synthesis & Implementation:** Resource utilization (LUTs, Flip-Flops) and timing analysis were optimized via Xilinx Vivado.
-4. **Physical Testing:** The bitstream was loaded onto the Basys 3 board, successfully demonstrating real-time noise filtering and accurate speed estimation on the physical DC motor setup.
+## System architecture
 
-##  Repository Structure
-* `/src` : VHDL source files (`.vhd`) for PWM, Encoder, Kalman, and Top modules.
-* `/constraints` : Xilinx Design Constraints (`.xdc`) file for Basys 3 pin mappings.
-* `/sim` : MATLAB/Simulink models and testbench files used for preliminary algorithm validation.
-* `/docs` : Hardware schematics, TÜBİTAK proposal summaries, and project reports.
+The design follows a modular VHDL architecture:
 
-##  License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+| Module | Responsibility |
+|---|---|
+| `pwm_generator` | Generates a 20 kHz PWM drive signal for the H-bridge, with duty cycle control. |
+| `encoder_reader` | Decodes A/B quadrature channels from the rotary encoder in real time, with direction detection. |
+| `kalman_filter` | 2-state discrete Kalman filter in Q16 fixed-point, including the adaptive `R` mechanism. |
+| `top_module` | Integrates all sub-modules, handles clock domains, and maps signals to physical pins via XDC constraints. |
+
+```
+                +------------------+
+  Encoder A/B ->| encoder_reader   |--- position, raw speed ---+
+                +------------------+                           |
+                                                               v
+  100 MHz clk ->+------------------+                  +------------------+
+                | pwm_generator    |--- PWM --------> |  kalman_filter   |--> filtered speed
+                +------------------+   (to H-bridge)  |  (Q16, adaptive) |
+                                                      +------------------+
+```
+
+---
+
+## Implementation parameters
+
+| Parameter | Value |
+|---|---|
+| System clock | 100 MHz |
+| PWM frequency | 20 kHz |
+| Kalman sampling rate | 100 Hz |
+| Arithmetic | Q16 fixed-point (`numerictype(1,32,16)`) |
+| Filter order | 2-state discrete Kalman filter |
+| Target device | Xilinx Artix-7 XC7A35T (Digilent Basys 3) |
+
+---
+
+## Hardware setup
+
+| Component | Part |
+|---|---|
+| FPGA board | Digilent Basys 3 (Artix-7 XC7A35T) |
+| Motor | Robotzade 12 V brushed DC motor with quadrature encoder |
+| Motor driver | TB6612FNG dual H-bridge |
+| Power supply | Mervesan 60 W regulated PSU |
+| Interface | Pmod headers for encoder and driver signals |
+
+Motor parameters (armature resistance, inductance, back-EMF constant, inertia) were derived analytically from datasheet specifications — stall current, back-EMF and no-load current — rather than measured on a test bench. This shaped the modeling approach and is discussed in the thesis.
+
+---
+
+## Design flow
+
+1. **Mathematical modeling** — DC motor state-space model derived from datasheet parameters.
+2. **Simulation** — Kalman filter designed and tuned in MATLAB/Simulink against the motor model.
+3. **Fixed-point conversion** — floating-point design converted to Q16 fixed-point with numerical safeguards.
+4. **HDL generation** — VHDL produced using MATLAB HDL Coder, then integrated with hand-written PWM and encoder modules.
+5. **Synthesis & implementation** — Xilinx Vivado, with multicycle path constraints applied to the Kalman datapath.
+6. **Hardware validation** — bitstream programmed to the Basys 3 and tested against the physical motor.
+
+---
+
+## Engineering challenges and solutions
+
+**Fixed-point numerical stability.** Moving the Kalman filter from floating-point simulation to Q16 fixed-point introduced instability in the covariance update. Three safeguards were required:
+- **P matrix symmetrization** after each update, to counter asymmetry introduced by rounding.
+- **Diagonal floor clamping**, preventing covariance terms from collapsing toward zero and stalling the filter.
+- **Residual-based zero-checks**, avoiding division by near-zero values in the gain computation.
+
+**Timing closure.** The computational depth of the Kalman update (matrix multiply, inversion, covariance update) exceeded what a single 100 MHz clock cycle allows. **Multicycle path constraints** were applied so the synthesis tool could spread the datapath across multiple cycles without violating timing.
+
+**Filter robustness.** A static `R` made the filter either sluggish during transients or noisy at steady state. The **adaptive `R` mechanism** — scaling measurement noise covariance with residual magnitude — resolved this trade-off and was the single most important factor in filter performance.
+
+---
+
+## Repository structure
+
+```
+.
+├── hdl/                    # VHDL source files
+│   ├── top_module.vhd
+│   ├── pwm_generator.vhd
+│   ├── encoder_reader.vhd
+│   └── kalman_filter.vhd
+├── constraints/
+│   └── basys3.xdc          # Pin assignments and timing constraints
+├── matlab/
+│   ├── motor_model.slx     # Simulink motor model
+│   ├── kalman_design.m     # Filter design and tuning
+│   └── fixed_point_conv.m  # Q16 conversion scripts
+├── docs/
+│   ├── block_diagram.png
+│   ├── results/            # Simulation vs. hardware plots
+│   └── thesis.pdf          # (optional) full thesis document
+├── media/
+│   └── hardware_setup.jpg  # Photos / demo video of the test rig
+├── LICENSE
+└── README.md
+```
+
+---
+
+## Getting started
+
+**Prerequisites:** Xilinx Vivado (2020.2 or later), MATLAB/Simulink with HDL Coder (only if regenerating the filter HDL).
+
+```bash
+git clone https://github.com/<username>/<repo-name>.git
+cd <repo-name>
+```
+
+1. Create a new Vivado RTL project targeting **xc7a35tcpg236-1**.
+2. Add all files from `hdl/` as design sources.
+3. Add `constraints/basys3.xdc` as a constraints file.
+4. Run synthesis, implementation, and generate the bitstream.
+5. Connect the hardware per the wiring table in `docs/`, then program the Basys 3.
+
+To regenerate the filter HDL from the model, open `matlab/kalman_design.m` and run the HDL Coder workflow.
+
+---
+
+## Results
+
+<!-- Replace this section with your actual measurements — this is what reviewers look for first. -->
+
+| Metric | Result |
+|---|---|
+| Speed estimation error (steady state) | _add your value_ |
+| Settling time vs. raw encoder differentiation | _add your value_ |
+| Resource utilization (LUT / FF / DSP) | _add from Vivado report_ |
+| Maximum achieved clock frequency | _add from timing report_ |
+
+_Add simulation-vs-hardware comparison plots to `docs/results/` and embed them here._
+
+---
+
+## Author
+
+**Emircan İpek** — Electrical & Electronics Engineering, Haliç University
+[LinkedIn](https://linkedin.com/in/emircan-ipek-b53159291)
+
+## License
+
+See [LICENSE](LICENSE).
