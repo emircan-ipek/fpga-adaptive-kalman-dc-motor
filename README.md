@@ -2,7 +2,6 @@
 
 This repository contains the VHDL source code and MATLAB/Simulink models for an FPGA-based DC motor control and speed estimation system. The project focuses on enhancing speed accuracy using an Adaptive Kalman Filter implemented on hardware. 
 
-> **Note:** This project was successfully funded and supported by the **TÜBİTAK 2209-A** University Students Research Projects Support Program.
 
 ##  System Architecture
 
