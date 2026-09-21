@@ -12,7 +12,7 @@ The hardware architecture is designed using a modular approach in VHDL, consisti
 * **Kalman Filter Module:** A hardware-accelerated Adaptive Kalman Filter algorithm for robust speed and position estimation, mitigating sensor noise.
 * **Top Module:** Integrates all sub-modules and maps them to the physical pins of the FPGA board using XDC constraints.
 
-## 🧰 Hardware & Software Used
+##  Hardware & Software Used
 
 * **Development Board:** Digilent Basys 3 (Artix-7 FPGA)
 * **Hardware Description Language:** VHDL
@@ -20,18 +20,18 @@ The hardware architecture is designed using a modular approach in VHDL, consisti
 * **Modeling & Simulation:** MATLAB & Simulink
 * **Actuators & Sensors:** DC Motor, Rotary Quadrature Encoder
 
-## 🚀 Project Workflow
+##  Project Workflow
 
 1. **Algorithm Design:** The Adaptive Kalman Filter was initially modeled and tested in MATLAB/Simulink.
 2. **Hardware Implementation:** The validated mathematical model was translated into synthesized VHDL code.
 3. **Synthesis & Implementation:** Resource utilization (LUTs, Flip-Flops) and timing analysis were optimized via Xilinx Vivado.
 4. **Physical Testing:** The bitstream was loaded onto the Basys 3 board, successfully demonstrating real-time noise filtering and accurate speed estimation on the physical DC motor setup.
 
-## 📂 Repository Structure
+##  Repository Structure
 * `/src` : VHDL source files (`.vhd`) for PWM, Encoder, Kalman, and Top modules.
 * `/constraints` : Xilinx Design Constraints (`.xdc`) file for Basys 3 pin mappings.
 * `/sim` : MATLAB/Simulink models and testbench files used for preliminary algorithm validation.
 * `/docs` : Hardware schematics, TÜBİTAK proposal summaries, and project reports.
 
-## 📄 License
+##  License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
