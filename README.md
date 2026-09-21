@@ -142,12 +142,11 @@ To regenerate the filter HDL from the model, open `matlab/kalman_design.m` and r
 
 | Metric | Result |
 |---|---|
-| Speed estimation error (steady state) | _add your value_ |
-| Settling time vs. raw encoder differentiation | _add your value_ |
-| Resource utilization (LUT / FF / DSP) | _add from Vivado report_ |
-| Maximum achieved clock frequency | _add from timing report_ |
+| Speed estimation error (steady state) | < %2 (±10 RPM)  Kalman Estimation (1012 RPM) - MOTOR(1000 RPM)|
+| Resource utilization (LUT / FF / DSP) | 15486 LUT - 7933 FF - 42 DSP |
+| Maximum achieved clock frequency | 100 MHz (WNS: +1.29ns) |
 
-_Add simulation-vs-hardware comparison plots to `docs/results/` and embed them here._
+
 
 ---
 
