@@ -95,22 +95,21 @@ Motor parameters (armature resistance, inductance, back-EMF constant, inertia) w
 ```
 .
 ├── hdl/                    # VHDL source files
-│   ├── top_module.vhd
-│   ├── pwm_generator.vhd
-│   ├── encoder_reader.vhd
-│   └── kalman_filter.vhd
+│   ├── TOP_Module.vhd
+│   ├── PWM_Generator.vhd
+│   ├── Encoder_Reader.vhd
+│   └── Kalman_28_yeni.vhd
+│   └── Kalman_28_yeni_pkg.vhd
+│   └── Kalman_28_yeni_tc.vhd
+|   └── MATLAB_Function.vhd
 ├── constraints/
-│   └── basys3.xdc          # Pin assignments and timing constraints
+│   └── Basys3_Kalman_Motor.xdc         # Pin assignments and timing constraints
 ├── matlab/
-│   ├── motor_model.slx     # Simulink motor model
-│   ├── kalman_design.m     # Filter design and tuning
-│   └── fixed_point_conv.m  # Q16 conversion scripts
+│   ├── kalman_with_testbench_for_vivado.slx    # Simulink motor model
 ├── docs/
-│   ├── block_diagram.png
-│   ├── results/            # Simulation vs. hardware plots
-│   └── thesis.pdf          # (optional) full thesis document
-├── media/
-│   └── hardware_setup.jpg  # Photos / demo video of the test rig
+│   ├── results/
+│   ├── Graduation Project II Word.docx     
+│   
 ├── LICENSE
 └── README.md
 ```
