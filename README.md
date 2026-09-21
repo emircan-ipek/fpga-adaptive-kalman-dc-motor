@@ -4,7 +4,7 @@ This repository contains the VHDL source code and MATLAB/Simulink models for an 
 
 > **Note:** This project was successfully funded and supported by the **TÜBİTAK 2209-A** University Students Research Projects Support Program.
 
-## 🛠️ System Architecture
+##  System Architecture
 
 The hardware architecture is designed using a modular approach in VHDL, consisting of the following core modules:
 * **PWM Generator:** Generates high-frequency PWM signals to drive the DC motor.
