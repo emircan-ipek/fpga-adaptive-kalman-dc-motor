@@ -1,17 +1,8 @@
- How to View and Run VHDL (.vhd) Files
+How to Run and Synthesize VHDL (.vhd) Files
 
 The `.vhd` files in this directory are Hardware Description Language (VHDL) source codes. 
-Unlike standard software scripts (e.g., Python or C++), they cannot be executed directly on a standard PC operating system. 
-They are designed to describe digital logic structures and must be synthesized for FPGA hardware.
+They are designed to describe digital logic structures and must be synthesized for FPGA hardware rather than executed like standard software scripts.
 
-Viewing the Source Code
-You do not need specialized engineering software just to read or review the code. You can open and inspect any `.vhd` file using standard text editors such as:
-* Visual Studio Code (VS Code)
-* Notepad++
-* Sublime Text
-* GitHub's native file viewer
-
-Simulating and Synthesizing
 To simulate the hardware logic, run testbenches, or generate a bitstream (`.bit`) to program an actual FPGA, you must use an EDA (Electronic Design Automation) environment. 
 
 These modules were developed, simulated, and hardware-verified using:
